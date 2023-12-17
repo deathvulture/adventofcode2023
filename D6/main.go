@@ -54,6 +54,9 @@ func getRoots(a int, b int, c int) (float64, float64) {
 }
 
 func calcWinRacePosibities(race race) float64 {
+	//in the example we got t = 7 and d = 9 so we need every value that return a distance greater than 9
+	//we use this inequality x * (7-x) > 9 ---> x^2 - 7x + 9 > 0
+	// we calculate the roots of the equation and then get the values between them
 	max, min := (getRoots(1, -1*race.time, race.distance))
 	if min != math.Floor(min) {
 		min = math.Ceil(min)
@@ -66,6 +69,7 @@ func calcWinRacePosibities(race race) float64 {
 		max -= 1
 	}
 
+	//return the number of win posibilities
 	return max - min + 1
 }
 

@@ -71,20 +71,18 @@ func mapSeedToLocation(maps [][]relationMap, seed int) int {
 	return value
 }
 
-func processFile(f *os.File) (int, int) {
+func processFile(f *os.File) int {
 	scanner := bufio.NewScanner(f)
 
 	scanner.Scan()
 	seedsString := scanner.Text()
-	mappingStage := 0
+	mappingStage := -1
 
-	var seedToSoilMap []relationMap
-	var soilToFertilizerMap []relationMap
-	var fertilizerToWaterMap []relationMap
-	var waterToLightMap []relationMap
-	var lightToTemperatureMap []relationMap
-	var temperatureTohumidityMap []relationMap
-	var humidityToLocationMap []relationMap
+	var seedToSoilMap, soilToFertilizerMap, fertilizerToWaterMap, waterToLightMap,
+		lightToTemperatureMap, temperatureTohumidityMap, humidityToLocationMap []relationMap
+
+	relationMaps := [][]relationMap{seedToSoilMap, soilToFertilizerMap, fertilizerToWaterMap,
+		waterToLightMap, lightToTemperatureMap, temperatureTohumidityMap, humidityToLocationMap}
 
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -94,29 +92,8 @@ func processFile(f *os.File) (int, int) {
 			_ = scanner.Scan()
 			continue
 		}
-
-		switch mappingStage {
-		case 1:
-			seedToSoilMap = append(seedToSoilMap, createRelationMap(line))
-		case 2:
-			soilToFertilizerMap = append(soilToFertilizerMap, createRelationMap(line))
-		case 3:
-			fertilizerToWaterMap = append(fertilizerToWaterMap, createRelationMap(line))
-		case 4:
-			waterToLightMap = append(waterToLightMap, createRelationMap(line))
-		case 5:
-			lightToTemperatureMap = append(lightToTemperatureMap, createRelationMap(line))
-		case 6:
-			temperatureTohumidityMap = append(temperatureTohumidityMap, createRelationMap(line))
-		case 7:
-			humidityToLocationMap = append(humidityToLocationMap, createRelationMap(line))
-		}
+		relationMaps[mappingStage] = append(relationMaps[mappingStage], createRelationMap(line))
 	}
-
-	relationMaps := [][]relationMap{
-		seedToSoilMap, soilToFertilizerMap, fertilizerToWaterMap,
-		waterToLightMap, lightToTemperatureMap, temperatureTohumidityMap,
-		humidityToLocationMap}
 
 	seeds := getSeeds(seedsString, seedToSoilMap)
 
@@ -132,7 +109,7 @@ func processFile(f *os.File) (int, int) {
 	err := scanner.Err()
 	check(err)
 
-	return minimumLocation, 0
+	return minimumLocation
 }
 
 func main() {
@@ -145,8 +122,7 @@ func main() {
 	f, err := os.Open(file)
 	check(err)
 
-	result, result2 := processFile(f)
+	result := processFile(f)
 	f.Close()
 	fmt.Println("minimum location:", result)
-	fmt.Println("total cards:", result2)
 }
